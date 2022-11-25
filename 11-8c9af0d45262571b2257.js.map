@@ -1,1 +1,0 @@
-{"version":3,"sources":["webpack:///./src/components/Contact/Contact.js"],"names":["Contact"],"mappings":"4FAAA,gCAQeA,UANC,WACZ,OACI","file":"11-8c9af0d45262571b2257.js","sourcesContent":["import React from \"react\"\n\nconst Contact = () => {\n    return(\n        <h1>Contact Me</h1>\n    )\n}\n\nexport default Contact"],"sourceRoot":""}
