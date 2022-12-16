@@ -1,3 +1,4 @@
+import { padding } from "@mui/system";
 import Box from "@mui/system/Box"
 import React from "react"
 
@@ -10,7 +11,8 @@ export const Template: React.FC<TemplateProps> = ({children}) => {
         <Box sx={{
             justifyContent: "center",
             maxWidth: "1120px",
-            margin: "5% 10%"
+            margin: "auto",
+            padding: "5% 10%"
         }}>
             {children}
         </Box>

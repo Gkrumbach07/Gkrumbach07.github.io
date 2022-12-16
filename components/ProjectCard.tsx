@@ -11,23 +11,30 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 
-import { ProjectDataType } from '../projects';
 import Divider from '@mui/joy/Divider';
 import AspectRatio from '@mui/joy/AspectRatio';
+import Link from '@mui/joy/Link';
+import { Database } from '../lib/database.types';
+import useMediaQuery, { BREAKPOINTS } from '../hooks/useMediaQuery';
+import Box from '@mui/joy/Box';
+import { animated, useTransition } from 'react-spring'
+import { useAuthenticated } from '../hooks/useAuthenticated';
+import EditProjectModal from './EditProjectModal';
+import CardCover from '@mui/joy/CardCover';
 
 
 export type ProjectCardProps = {
-    project: ProjectDataType
+    project: Database["public"]["Tables"]["projects"]["Row"]
 }
 
 // flesh out
-const getTimeSince = (date: Date) => {
+const getTimeSince = (date: string) => {
     if (date) {
-        return date.toLocaleDateString()
+        return (new Date(date)).toLocaleDateString()
     }
 }
 
-const getStateChip = (state: ProjectDataType["state"]) => {
+const getStateChip = (state: Database["public"]["Enums"]["status"]) => {
     switch (state) {
         case "active":
             return <Chip size='sm' color='primary' startDecorator={<AddRoundedIcon />}>Active</Chip>
@@ -43,37 +50,88 @@ const getStateChip = (state: ProjectDataType["state"]) => {
     }
 }
 
+
+
 const ProjectCard = ({ project }: ProjectCardProps) => {
+    const isSmall = useMediaQuery(BREAKPOINTS.down("sm"))
+    const isMobile = useMediaQuery(BREAKPOINTS.down("mobile"))
+    const isAdmin = useAuthenticated()
+
     return (
-        <Card variant="outlined" sx={{ width: 320 }}>
-            <CardOverflow>
-        <AspectRatio ratio="2" sx={{marginBottom: 2}}>
-          <img
-            src="https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318"
-            srcSet="https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318&dpr=2 2x"
-            loading="lazy"
-            alt=""
-          />
-        </AspectRatio>
-      </CardOverflow>
-            <Typography level="h2" fontSize="md" sx={{ mb: 0.5 }}>
-                {project.title}
-            </Typography>
-            <IconButton
-                aria-label="bookmark Bahamas Islands"
-                variant="plain"
-                color="neutral"
-                size="sm"
-                sx={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}
-            >
-            </IconButton>
-            <Typography level="body3">
-                {project.details}
-            </Typography>
-            <Stack direction="row" spacing={1} marginBottom={2} marginTop={1}>
-                {project.tags.map(tag => (
-                    <Chip key={tag} size="sm" variant='outlined' color='neutral'>{tag}</Chip>
-                ))}
+        <Card variant="outlined"
+            sx={(theme) => ({
+                transition: 'transform 0.3s, border 0.3s',
+                '&:hover': {
+                    borderColor: theme.vars.palette.primary.outlinedHoverBorder,
+                    transform: 'translateY(-2px)',
+                },
+            })}>
+            {
+                !isSmall && (
+                    <CardOverflow>
+                        <AspectRatio ratio="2" sx={{ marginBottom: 2 }}>
+                            <img
+                                src="https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318"
+                                srcSet="https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318&dpr=2 2x"
+                                loading="lazy"
+                                alt=""
+                            />
+                        </AspectRatio>
+                    </CardOverflow>
+                )
+            }
+            {
+                isAdmin && (
+                    <Box sx={{
+                        position: 'absolute',
+                        zIndex: 2,
+                        right: '0.5rem',
+                        top: "0.5rem",
+                      }}>
+                        <EditProjectModal project={project} buttonVariant={!isSmall ? "soft" : "outlined"}/>
+                    </Box>
+                )
+            }
+            <Stack direction={isSmall ? "row" : "column"} spacing={isSmall ? 2 : 0} height="100%">
+                {!isMobile && isSmall && (
+                    <Box minWidth="100px" >
+                        <AspectRatio ratio="1" sx={{ marginBottom: 2 }}>
+                            <img
+                                src="https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318"
+                                srcSet="https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318&dpr=2 2x"
+                                loading="lazy"
+                                alt=""
+                            />
+                        </AspectRatio>
+                    </Box>
+                )}
+                <Stack direction="column" height="100%">
+                    <Typography level="h2" fontSize="md" sx={{ mb: 0.5 }}>
+                        <Link
+                            overlay
+                            underline="none"
+                            onClick={() => fetch('/api/projects').then((res) => res.json())}
+                            sx={{ color: 'text.primary' }}
+                        >
+                            {project.title}
+                        </Link>
+                    </Typography>
+                    <Typography level="body3" sx={{
+                        display: '-webkit-box',
+                        overflow: 'hidden',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 3,
+                    }}>
+                        {project.details}
+                    </Typography>
+                    {project.tags && (
+                        <Stack direction="row" spacing={1} marginBottom={1} marginTop="auto" paddingTop={1}>
+                            {project.tags.map(tag => (
+                                <Chip key={tag} size="sm" variant='outlined' color='neutral'>{tag}</Chip>
+                            ))}
+                        </Stack>
+                    )}
+                </Stack>
             </Stack>
             <Divider inset="context" />
             <CardOverflow
@@ -88,13 +146,19 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
                 }}
             >
                 <Typography level="body3" sx={{ fontWeight: 'md', color: 'text.secondary' }}>
-                    {getStateChip(project.state)}
+                    {getStateChip(project.status ?? "upcoming")}
                 </Typography>
-                <Divider orientation="vertical" />
-                <Typography level="body3" sx={{ fontWeight: 'md', color: 'text.secondary' }}>
-                    {`Last updated ${getTimeSince(project.lastUpdated)}`}
-                </Typography>
+                {project.lastUpdated && (
+                    <>
+                        <Divider orientation="vertical" />
+                        <Typography level="body3" sx={{ fontWeight: 'md', color: 'text.secondary' }}>
+                            {`Last updated ${getTimeSince(project.lastUpdated)}`}
+                        </Typography>
+                    </>
+                )}
             </CardOverflow>
+
+
         </Card>
     )
 }

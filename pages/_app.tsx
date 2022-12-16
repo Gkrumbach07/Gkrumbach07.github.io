@@ -1,11 +1,20 @@
+import React from 'react'
+
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
+
+import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { SessionContextProvider, Session } from '@supabase/auth-helpers-react'
+
 import { Theme } from '../components/Theme'
 
+export default function App({ Component, pageProps }: AppProps<{
+  initialSession: Session,
+}>) {
+  const [supabase] = React.useState(() => createBrowserSupabaseClient())
 
-export default function App({ Component, pageProps }: AppProps) {
   return (
-    <>
+    <SessionContextProvider supabaseClient={supabase} initialSession={pageProps.initialSession}>
       <Head>
         <title>Gage Krumbach</title>
         <meta name="description" content="Gage Krumbach" />
@@ -14,6 +23,6 @@ export default function App({ Component, pageProps }: AppProps) {
       <Theme>
         <Component {...pageProps} />
       </Theme>
-    </>
+    </SessionContextProvider>
   )
 }

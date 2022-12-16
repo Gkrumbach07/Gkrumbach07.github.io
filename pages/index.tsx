@@ -1,7 +1,6 @@
 import React from "react"
 
 import Template from "../components/Template";
-import Stack from "@mui/system/Stack";
 import Header from "../components/Header";
 import ProjectCard from "../components/ProjectCard";
 import Typography from "@mui/joy/Typography";
@@ -11,10 +10,27 @@ import TabList from '@mui/joy/TabList';
 import TabPanel from '@mui/joy/TabPanel';
 import Tab from '@mui/joy/Tab';
 import { Box } from "@mui/system";
+import { getAllProjects } from "../lib/api/database";
+import { GetServerSidePropsContext, PreviewData, NextApiRequest, NextApiResponse } from "next";
+import { ParsedUrlQuery } from "querystring";
+import { Database } from "../lib/database.types";
+import useMediaQuery, { BREAKPOINTS } from "../hooks/useMediaQuery";
+import { useAuthenticated } from "../hooks/useAuthenticated";
 
-import { projectData } from "../projects";
+export async function getStaticProps(context: GetServerSidePropsContext<ParsedUrlQuery, PreviewData> | { req: NextApiRequest; res: NextApiResponse<any>; }) {
+  const res = await getAllProjects(context)
 
-export default function Home() {
+  return {
+    props: {
+      projects: res.data
+    },
+  }
+}
+
+export default function Home({ projects }: { projects: Database["public"]["Tables"]["projects"]["Row"][] }) {
+  const isSmall = useMediaQuery(BREAKPOINTS.down("sm")) 
+  const isAdmin = useAuthenticated()
+
   return (
     <Box>
       <Tabs defaultValue={0}>
@@ -27,11 +43,11 @@ export default function Home() {
           <Template>
             <Header />
             <Divider component="div" role="presentation" sx={{ marginTop: 10 }}>
-              <Typography level="h3">Recent Projects</Typography>
+              <Typography level="h3">Pinned Projects</Typography>
             </Divider>
-            <Stack direction="row" spacing={2} sx={{ marginY: 3 }}>
-              {projectData.map(project => <ProjectCard project={project} />)}
-            </Stack>
+            <Box sx={{ marginY: 3, display: "grid", rowGap: 2, columnGap: 2, justifyContent: "center", justifyItems: "stretch", gridTemplateColumns: isSmall ? "1fr" : "repeat(auto-fit, minmax(270px, 1fr))" }}>
+              {projects.filter(project => project.pinned).map(project => <ProjectCard key={project.id} project={project} />)}
+            </Box>
           </Template>
         </TabPanel>
         <TabPanel value={1}>

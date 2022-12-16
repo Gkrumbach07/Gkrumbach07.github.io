@@ -29,7 +29,7 @@ const Header = () => {
                 </AspectRatio>
             </Box>
 
-            <Stack direction="column">
+            <Stack direction="column" textAlign={isSmall ? "center" : undefined}>
                 <Typography level="body1" textColor="GrayText">
                     Software Engineer
                 </Typography>

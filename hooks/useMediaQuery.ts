@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 
-export type BreakpointValuesType = "xs" | "sm" | "md" | "lg" | "xl"
+export type BreakpointValuesType = "mobile" | "sm" | "md" | "lg" | "xl"
 
 export const BREAKPOINTS = {
   values: {
-    "xs": "0px",
+    "mobile": "500px",
     "sm": "750px",
     "md": "1050px",
     "lg": "1350px",
