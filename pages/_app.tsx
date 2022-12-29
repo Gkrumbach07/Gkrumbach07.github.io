@@ -7,6 +7,8 @@ import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { SessionContextProvider, Session } from '@supabase/auth-helpers-react'
 
 import { Theme } from '../components/Theme'
+import AlertProvider from '../components/AlertProvider'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 export default function App({ Component, pageProps }: AppProps<{
   initialSession: Session,
@@ -18,10 +20,12 @@ export default function App({ Component, pageProps }: AppProps<{
       <Head>
         <title>Gage Krumbach</title>
         <meta name="description" content="Gage Krumbach" />
-        <link rel="icon" href="assets/gage_krumbach.jpg"/>
+        <link rel="icon" href="assets/gage_krumbach.jpg" />
       </Head>
       <Theme>
-        <Component {...pageProps} />
+        <AlertProvider>
+          <Component {...pageProps} />
+        </AlertProvider>
       </Theme>
     </SessionContextProvider>
   )

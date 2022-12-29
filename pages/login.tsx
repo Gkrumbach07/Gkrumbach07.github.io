@@ -19,14 +19,14 @@ const Login = () => {
     }
 
     async function signInWithGitHub() {
-        const { data, error } = await supabase.auth.signInWithOAuth({
+        await supabase.auth.signInWithOAuth({
             provider: 'github',
         })
         await fetchUser()
     }
 
     async function signout() {
-        const { error } = await supabase.auth.signOut()
+        await supabase.auth.signOut()
         await fetchUser()
     }
 

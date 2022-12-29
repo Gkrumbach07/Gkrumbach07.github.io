@@ -14,7 +14,6 @@ export interface Database {
           id: number
           title: string
           link: string | null
-          tags: string[] | null
           lastUpdated: string | null
           status: Database["public"]["Enums"]["status"]
           details: string | null
@@ -24,7 +23,6 @@ export interface Database {
           id?: number
           title: string
           link?: string | null
-          tags?: string[] | null
           lastUpdated?: string | null
           status: Database["public"]["Enums"]["status"]
           details?: string | null
@@ -34,11 +32,35 @@ export interface Database {
           id?: number
           title?: string
           link?: string | null
-          tags?: string[] | null
           lastUpdated?: string | null
           status?: Database["public"]["Enums"]["status"]
           details?: string | null
           pinned?: boolean
+        }
+      }
+      projects_tags: {
+        Row: {
+          project_id: number
+          tag_id: string
+        }
+        Insert: {
+          project_id: number
+          tag_id: string
+        }
+        Update: {
+          project_id?: number
+          tag_id?: string
+        }
+      }
+      tags: {
+        Row: {
+          name: string
+        }
+        Insert: {
+          name: string
+        }
+        Update: {
+          name?: string
         }
       }
     }

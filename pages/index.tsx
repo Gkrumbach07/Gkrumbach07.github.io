@@ -10,33 +10,30 @@ import TabList from '@mui/joy/TabList';
 import TabPanel from '@mui/joy/TabPanel';
 import Tab from '@mui/joy/Tab';
 import { Box } from "@mui/system";
-import { getAllProjects } from "../lib/api/database";
-import { GetServerSidePropsContext, PreviewData, NextApiRequest, NextApiResponse } from "next";
-import { ParsedUrlQuery } from "querystring";
-import { Database } from "../lib/database.types";
 import useMediaQuery, { BREAKPOINTS } from "../hooks/useMediaQuery";
-import { useAuthenticated } from "../hooks/useAuthenticated";
+import AllProjects from "../components/AllProjects";
+import { getProjects } from "../lib/api/projects";
+import { Project } from "../lib/types/types";
 
-export async function getStaticProps(context: GetServerSidePropsContext<ParsedUrlQuery, PreviewData> | { req: NextApiRequest; res: NextApiResponse<any>; }) {
-  const res = await getAllProjects(context)
+export async function getStaticProps() {
+  const projects = await getProjects()
 
   return {
     props: {
-      projects: res.data
+      projects: projects,
     },
   }
 }
 
-export default function Home({ projects }: { projects: Database["public"]["Tables"]["projects"]["Row"][] }) {
-  const isSmall = useMediaQuery(BREAKPOINTS.down("sm")) 
-  const isAdmin = useAuthenticated()
+export default function Home({ projects }: { projects: Project[] }) {
+  const isSmall = useMediaQuery(BREAKPOINTS.down("sm"))  
 
   return (
     <Box>
       <Tabs defaultValue={0}>
         <TabList variant="soft" sx={{ width: 300, alignSelf: "center" }}>
           <Tab>Home</Tab>
-          <Tab>About</Tab>
+          <Tab>Projects</Tab>
           <Tab>Blog</Tab>
         </TabList>
         <TabPanel value={0}>
@@ -46,12 +43,12 @@ export default function Home({ projects }: { projects: Database["public"]["Table
               <Typography level="h3">Pinned Projects</Typography>
             </Divider>
             <Box sx={{ marginY: 3, display: "grid", rowGap: 2, columnGap: 2, justifyContent: "center", justifyItems: "stretch", gridTemplateColumns: isSmall ? "1fr" : "repeat(auto-fit, minmax(270px, 1fr))" }}>
-              {projects.filter(project => project.pinned).map(project => <ProjectCard key={project.id} project={project} />)}
+              {projects.filter(project => project.pinned).map(project => <ProjectCard key={project.title} project={project} />)}
             </Box>
           </Template>
         </TabPanel>
         <TabPanel value={1}>
-          <b>Second</b> tab panel
+          <AllProjects allProjects={projects}/>
         </TabPanel>
         <TabPanel value={2}>
           <b>Third</b> tab panel

@@ -14,17 +14,14 @@ import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import Divider from '@mui/joy/Divider';
 import AspectRatio from '@mui/joy/AspectRatio';
 import Link from '@mui/joy/Link';
-import { Database } from '../lib/database.types';
+import { Database } from '../lib/types/database.types';
 import useMediaQuery, { BREAKPOINTS } from '../hooks/useMediaQuery';
 import Box from '@mui/joy/Box';
-import { animated, useTransition } from 'react-spring'
-import { useAuthenticated } from '../hooks/useAuthenticated';
-import EditProjectModal from './EditProjectModal';
-import CardCover from '@mui/joy/CardCover';
+import { ProjectRowType } from '../lib/types/types';
 
 
 export type ProjectCardProps = {
-    project: Database["public"]["Tables"]["projects"]["Row"]
+    project: ProjectRowType
 }
 
 // flesh out
@@ -55,7 +52,6 @@ const getStateChip = (state: Database["public"]["Enums"]["status"]) => {
 const ProjectCard = ({ project }: ProjectCardProps) => {
     const isSmall = useMediaQuery(BREAKPOINTS.down("sm"))
     const isMobile = useMediaQuery(BREAKPOINTS.down("mobile"))
-    const isAdmin = useAuthenticated()
 
     return (
         <Card variant="outlined"
@@ -71,8 +67,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
                     <CardOverflow>
                         <AspectRatio ratio="2" sx={{ marginBottom: 2 }}>
                             <img
-                                src="https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318"
-                                srcSet="https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318&dpr=2 2x"
+                                src="https://storage.googleapis.com/gd-misc/MaterialYouWallpapers/Oddfellows_Handmade-GreenDesktop.png"
                                 loading="lazy"
                                 alt=""
                             />
@@ -80,18 +75,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
                     </CardOverflow>
                 )
             }
-            {
-                isAdmin && (
-                    <Box sx={{
-                        position: 'absolute',
-                        zIndex: 2,
-                        right: '0.5rem',
-                        top: "0.5rem",
-                      }}>
-                        <EditProjectModal project={project} buttonVariant={!isSmall ? "soft" : "outlined"}/>
-                    </Box>
-                )
-            }
+           
             <Stack direction={isSmall ? "row" : "column"} spacing={isSmall ? 2 : 0} height="100%">
                 {!isMobile && isSmall && (
                     <Box minWidth="100px" >
@@ -127,7 +111,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
                     {project.tags && (
                         <Stack direction="row" spacing={1} marginBottom={1} marginTop="auto" paddingTop={1}>
                             {project.tags.map(tag => (
-                                <Chip key={tag} size="sm" variant='outlined' color='neutral'>{tag}</Chip>
+                                <Chip key={tag.name} size="sm" variant='outlined' color='neutral'>{tag.name}</Chip>
                             ))}
                         </Stack>
                     )}

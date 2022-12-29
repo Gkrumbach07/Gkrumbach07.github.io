@@ -1,6 +1,6 @@
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { Database } from '../../lib/database.types'
+import { Database } from '../../lib/types/database.types'
 
 export default async (req: NextApiRequest, res: NextApiResponse<any>) => {
   const supabaseServerClient = createServerSupabaseClient<Database>({ req, res })
@@ -11,3 +11,4 @@ export default async (req: NextApiRequest, res: NextApiResponse<any>) => {
 
   res.status(200).json({ data: { isAdmin: user?.email === "gkrumbach@gmail.com" }, error})
 }
+
