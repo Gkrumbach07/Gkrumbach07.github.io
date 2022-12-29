@@ -8,6 +8,7 @@ export type Project = {
     lastUpdated: string | null,
     status: ProjectStatus,
     details: string | null,
+    tags: string[],
     pinned: boolean,
     visible: boolean
 }

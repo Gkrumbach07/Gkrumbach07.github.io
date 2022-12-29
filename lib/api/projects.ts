@@ -23,6 +23,7 @@ export const getProjects = async (): Promise<Project[]> => {
         lastUpdated: githubProperties?.last_updated ?? null,
         status: getProjectStatus(githubProperties?.last_updated, notionProperties.status),
         details: githubProperties?.description ?? null,
+        tags: notionProperties.tags,
         pinned: notionProperties.pinned,
         visible: notionProperties.public
     }

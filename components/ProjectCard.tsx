@@ -17,11 +17,11 @@ import Link from '@mui/joy/Link';
 import { Database } from '../lib/types/database.types';
 import useMediaQuery, { BREAKPOINTS } from '../hooks/useMediaQuery';
 import Box from '@mui/joy/Box';
-import { ProjectRowType } from '../lib/types/types';
+import { Project } from '../lib/types/types';
 
 
 export type ProjectCardProps = {
-    project: ProjectRowType
+    project: Project
 }
 
 // flesh out
@@ -111,7 +111,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
                     {project.tags && (
                         <Stack direction="row" spacing={1} marginBottom={1} marginTop="auto" paddingTop={1}>
                             {project.tags.map(tag => (
-                                <Chip key={tag.name} size="sm" variant='outlined' color='neutral'>{tag.name}</Chip>
+                                <Chip key={tag} size="sm" variant='outlined' color='neutral'>{tag}</Chip>
                             ))}
                         </Stack>
                     )}

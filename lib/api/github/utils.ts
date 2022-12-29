@@ -27,7 +27,6 @@ export const parseGithubRepository = (repo: components["schemas"]["full-reposito
     return {
         description: repo.description,
         last_updated: repo.updated_at,
-        topics: repo.topics,
         watchers_count: repo.watchers_count,
         stargazers_count: repo.stargazers_count,
         forks_count: repo.forks_count,
