@@ -10,9 +10,9 @@ export const Template: React.FC<TemplateProps> = ({children}) => {
     return (
         <Box sx={{
             justifyContent: "center",
-            maxWidth: "1120px",
-            margin: "auto",
-            padding: "5% 10%"
+            marginTop: "-180px",
+            padding: 1,
+            paddingX: "10%",
         }}>
             {children}
         </Box>

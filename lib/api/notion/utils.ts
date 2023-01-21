@@ -10,6 +10,7 @@ export const parseNotionProjectProperties = (page: PageObjectResponse) => {
         link: properties.Github.url,
         title: properties.Name.title[0].plain_text,
         pinned: properties.Pinned.checkbox,
-        public: properties.Public.checkbox
+        public: properties.Public.checkbox,
+        details: properties.Details.rich_text?.[0]?.plain_text ?? ""
     }
 }

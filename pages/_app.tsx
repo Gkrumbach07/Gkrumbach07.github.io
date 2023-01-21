@@ -8,7 +8,7 @@ import { SessionContextProvider, Session } from '@supabase/auth-helpers-react'
 
 import { Theme } from '../components/Theme'
 import AlertProvider from '../components/AlertProvider'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { ParallaxProvider } from 'react-scroll-parallax'
 
 export default function App({ Component, pageProps }: AppProps<{
   initialSession: Session,
@@ -23,9 +23,9 @@ export default function App({ Component, pageProps }: AppProps<{
         <link rel="icon" href="assets/gage_krumbach.jpg" />
       </Head>
       <Theme>
-        <AlertProvider>
+        <ParallaxProvider>
           <Component {...pageProps} />
-        </AlertProvider>
+        </ParallaxProvider>
       </Theme>
     </SessionContextProvider>
   )

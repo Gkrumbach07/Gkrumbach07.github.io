@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import Card from '@mui/joy/Card';
 import Typography from '@mui/joy/Typography';
-import Stack from '@mui/system/Stack';
+import Stack from '@mui/joy/Stack';
 import Chip from '@mui/joy/Chip';
-import IconButton from '@mui/joy/IconButton';
 import CardOverflow from '@mui/joy/CardOverflow';
 import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
@@ -24,9 +23,23 @@ export type ProjectCardProps = {
     project: Project
 }
 
-// flesh out
 const getTimeSince = (date: string) => {
-    if (date) {
+    const datetime = new Date(date)
+    if (datetime) {
+        const fromToday = Date.now() - datetime.getTime()
+        if(fromToday / 3.6e+6 < 24) {
+            const time = Math.ceil(fromToday / 3.6e+6)
+            return `${time} hour${time === 1 ? "" : "s"} ago`
+        }
+        else if(fromToday / 8.64e+7 < 28) {
+            const time = Math.ceil(fromToday / 8.64e+7)
+            return `${time} day${time === 1 ? "" : "s"} ago`
+        }
+        else if(fromToday / 2.628e+9 < 12) {
+            const time = Math.ceil(fromToday / 2.628e+9)
+            return `${time} month${time === 1 ? "" : "s"} ago`
+        }
+
         return (new Date(date)).toLocaleDateString()
     }
 }
@@ -53,7 +66,13 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
     const isSmall = useMediaQuery(BREAKPOINTS.down("sm"))
     const isMobile = useMediaQuery(BREAKPOINTS.down("mobile"))
 
+    const image = useMemo(() => {
+        const choice = Math.floor(Math.random() * 4)
+        return `/assets/background-${choice}.png`
+    }, [])
+
     return (
+        <>
         <Card variant="outlined"
             sx={(theme) => ({
                 transition: 'transform 0.3s, border 0.3s',
@@ -67,7 +86,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
                     <CardOverflow>
                         <AspectRatio ratio="2" sx={{ marginBottom: 2 }}>
                             <img
-                                src="https://storage.googleapis.com/gd-misc/MaterialYouWallpapers/Oddfellows_Handmade-GreenDesktop.png"
+                                src={image}
                                 loading="lazy"
                                 alt=""
                             />
@@ -75,14 +94,13 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
                     </CardOverflow>
                 )
             }
-           
             <Stack direction={isSmall ? "row" : "column"} spacing={isSmall ? 2 : 0} height="100%">
                 {!isMobile && isSmall && (
                     <Box minWidth="100px" >
                         <AspectRatio ratio="1" sx={{ marginBottom: 2 }}>
                             <img
-                                src="https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318"
-                                srcSet="https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318&dpr=2 2x"
+                                src={image}
+                                srcSet={image}
                                 loading="lazy"
                                 alt=""
                             />
@@ -94,7 +112,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
                         <Link
                             overlay
                             underline="none"
-                            onClick={() => fetch('/api/projects').then((res) => res.json())}
+                            href={project.link ?? undefined}
                             sx={{ color: 'text.primary' }}
                         >
                             {project.title}
@@ -144,6 +162,8 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
 
 
         </Card>
+        </>
+        
     )
 }
 

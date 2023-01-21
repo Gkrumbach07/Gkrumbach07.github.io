@@ -9,18 +9,10 @@ const AllProjects = ({ allProjects }: { allProjects: Project[] }) => {
 
     return (
         <Box>
-            <Divider component="div" role="presentation" sx={{ marginTop: 10 }}>
+            <Divider component="div" role="presentation">
               <Typography level="h3">All Projects</Typography>
             </Divider>
-            <Box sx={{ marginY: 3, display: "grid", rowGap: 4, columnGap: 4, gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))"  }}>
-                {allProjects.map(project => <ProjectCard key={project.title} project={project} />)}
-                {allProjects.map(project => <ProjectCard key={project.title} project={project} />)}
-                {allProjects.map(project => <ProjectCard key={project.title} project={project} />)}
-                {allProjects.map(project => <ProjectCard key={project.title} project={project} />)}
-                {allProjects.map(project => <ProjectCard key={project.title} project={project} />)}
-                {allProjects.map(project => <ProjectCard key={project.title} project={project} />)}
-                {allProjects.map(project => <ProjectCard key={project.title} project={project} />)}
-                {allProjects.map(project => <ProjectCard key={project.title} project={project} />)}
+            <Box sx={{ marginY: 3, display: "grid", rowGap: 2, columnGap: 2, gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))"  }}>
                 {allProjects.map(project => <ProjectCard key={project.title} project={project} />)}
             </Box>
         </Box>

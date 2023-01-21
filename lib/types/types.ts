@@ -22,4 +22,5 @@ export type NotionProjectProperties = {
     "Name": PageObjectResponse["properties"][string] & { type: "title" }
     "Pinned": PageObjectResponse["properties"][string] & { type: "checkbox" }
     "Public": PageObjectResponse["properties"][string] & { type: "checkbox" }
+    "Details": PageObjectResponse["properties"][string] & { type: "rich_text" }
 }
