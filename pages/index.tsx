@@ -14,6 +14,7 @@ import AllProjects from "../components/AllProjects";
 import { getProjects } from "../lib/api/projects";
 import { Project } from "../lib/types/types";
 import { ParallaxHeader } from "../components/ParallaxHeader";
+import { ParallaxProvider } from "react-scroll-parallax";
 
 export async function getStaticProps() {
   const projects = await getProjects()
@@ -29,7 +30,7 @@ export default function Home({ projects }: { projects: Project[] }) {
   const isSmall = useMediaQuery(BREAKPOINTS.down("sm"))
 
   return (
-    <>
+    <ParallaxProvider>
       <ParallaxHeader />
       <Template>
         <Tabs size="lg" defaultValue={0} sx={{ backgroundColor: "transparent", "--Tabs-gap": "10px"}}>
@@ -59,7 +60,7 @@ export default function Home({ projects }: { projects: Project[] }) {
           </TabPanel> */}
         </Tabs>
       </Template>
-    </>
+    </ParallaxProvider>
 
   )
 }
