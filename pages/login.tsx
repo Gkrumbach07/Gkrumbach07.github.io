@@ -1,22 +1,23 @@
 import { User, useSupabaseClient } from '@supabase/auth-helpers-react'
 import Button from '@mui/joy/Button'
 import Box from '@mui/joy/Box'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import Image from 'next/image'
 
 const Login = () => {
     const supabase = useSupabaseClient()
 
     const [user, setUser] = useState<User | null>()
 
-    useEffect(() => {
-        fetchUser()
-    }, [])
-
-    const fetchUser = () => {
+    const fetchUser = useCallback( () => {
         supabase.auth.getUser().then(resp => {
             setUser(resp.data.user)
         }).catch(() => setUser(null))
-    }
+    }, [supabase.auth])
+
+    useEffect(() => {
+        fetchUser()
+    }, [fetchUser])
 
     async function signInWithGitHub() {
         await supabase.auth.signInWithOAuth({
@@ -37,7 +38,7 @@ const Login = () => {
                 {user === null
                     ? (
                         <Button onClick={signInWithGitHub} startDecorator={(
-                            <img width="25px" alt="GitHub Login" src="assets/GitHub-Mark-Light-120px-plus.png" />
+                            <Image width={25} alt="GitHub Login" src="assets/GitHub-Mark-Light-120px-plus.png" />
                         )}>
                             Login with GitHub
                         </Button>

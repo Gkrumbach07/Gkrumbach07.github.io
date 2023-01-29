@@ -17,6 +17,7 @@ import { Database } from '../lib/types/database.types';
 import useMediaQuery, { BREAKPOINTS } from '../hooks/useMediaQuery';
 import Box from '@mui/joy/Box';
 import { Project } from '../lib/types/types';
+import Image from 'next/image';
 
 
 export type ProjectCardProps = {
@@ -85,7 +86,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
                 !isSmall && (
                     <CardOverflow>
                         <AspectRatio ratio="2" sx={{ marginBottom: 2 }}>
-                            <img
+                            <Image
                                 src={image}
                                 loading="lazy"
                                 alt=""
@@ -98,9 +99,8 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
                 {!isMobile && isSmall && (
                     <Box minWidth="100px" >
                         <AspectRatio ratio="1" sx={{ marginBottom: 2 }}>
-                            <img
+                            <Image
                                 src={image}
-                                srcSet={image}
                                 loading="lazy"
                                 alt=""
                             />

@@ -13,15 +13,7 @@ type geoJSONType = {
     }
 }
 
-const layerStyle = {
-    type: 'line',
-    paint: {
-        "line-color": "#fff",
-        "line-width": 5
-    }
-};
-
-export default () => {
+ const Bwca = () => {
     const [geojson, setGeojson] = React.useState<GeoJSON.FeatureCollection<GeoJSON.Geometry>>({
         type: 'FeatureCollection',
         features: []
@@ -60,3 +52,5 @@ export default () => {
         </Map>
     )
 }
+
+export default Bwca
