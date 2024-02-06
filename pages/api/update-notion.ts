@@ -5,6 +5,7 @@ import { load } from 'cheerio';
 import axios from "axios";
 import { BlockObjectRequest, PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 
+
 type Restaurant = {
 	name?: string;
 	handle?: string;
@@ -19,37 +20,15 @@ type MessageData = {
 	restaurants: Restaurant[];
 };
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+
+const notion = new Client({ auth: process.env.NOTION_RESTAURANT_API_KEY });
+const openai = new OpenAI({
+	apiKey: process.env.OPENAI_API_KEY,
+});
+
+const fetchMetaContentFromUrl = async (url: string) => {
 	try {
-		// Check if the request method is POST
-		if (req.method !== 'POST') {
-			return res.status(405).end(); // Method Not Allowed
-		}
-
-		// Simple Authentication Check
-		const { authorization } = req.headers;
-
-		if (!authorization || authorization !== `Bearer ${process.env.PHONE_SECRET_KEY}`) {
-			return res.status(401).json({ message: 'Unauthorized', error: true });
-		}
-
-		// Assuming the URL is sent in the request body
-		const { url, personalNote } = req.body;
-
-		if (!url) {
-			return res.status(400).json({ message: 'URL is required', error: true });
-		}
-
-		// Immediately respond to the client
-		// res.status(200).json({ message: 'Valid request received, processing in background' });
-
-		// // Background task
-		// setImmediate(async () => {
-		// try {
-		// Place your long-running tasks here
-		// For example, API calls, database updates, etc.
-		// console.log('Background task is running');
-
+		console.log('Fetching meta data from:', url)
 		const { data } = await axios.get(url);
 
 		const $ = load(data);
@@ -57,20 +36,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		const metaContentDescription = $(`meta[property='og:description']`).attr('content');
 
 		if (!metaContentTitle || !metaContentDescription) {
-			return res.status(400).json({ message: 'Failed to parse meta data', error: true });
-			// console.error('Failed to parse meta data');
-			// return;
+			throw new Error('og:title or og:description not found in the meta tags');
 		}
 
-		const title = `${metaContentTitle}. ${metaContentDescription}`
+		return `${metaContentTitle}. ${metaContentDescription}`
+	} catch (error) {
+		if (error instanceof Error) {
+			throw new Error('Failed to fetch meta data: ' + error.message);
+		}
+		else {
+			throw new Error('Failed to fetch meta data: ' + error);
+		}
+	}
+}
 
-		console.log('Restaurant og:title from URL:', title);
-
-		const notion = new Client({ auth: process.env.NOTION_RESTAURANT_API_KEY });
-		const openai = new OpenAI({
-			apiKey: process.env.OPENAI_API_KEY,
-		});
-
+const askOpenAI = async (title: string) => {
+	try {
 		const prompt = `Task: Create a JSON blob for restaurant details.
 				- Format the output as JSON.
 				- Key: "restaurants", Value: Array of objects.
@@ -100,9 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		const message = openAiResponse.choices[0].message.content
 
 		if (!message) {
-			return res.status(400).json({ message: 'Failed to parse data', error: true });
-			// console.error('Failed to parse data');
-			// return;
+			throw new Error('No message content found in OpenAI response');
 		}
 
 		console.log('OpenAI response:', message);
@@ -111,7 +90,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 			messageData = JSON.parse(message);
 		}
 		catch (error) {
-			console.error('Failed to parse OpenAI response:', error);
+			console.error('Failed to parse OpenAI response as JSON... trying to extract handles manually');
 			// try to find handles
 			const handles = message.match(/@([a-zA-Z0-9_]+)/g)
 			if (handles) {
@@ -121,24 +100,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 			}
 		}
 
+		console.log('Parsed OpenAI response:', messageData);
+
 		// validate the parsed data
 		if (!Array.isArray(messageData.restaurants)) {
-			return res.status(400).json({ message: 'Invalid data format', error: true });
-			// console.error('Invalid data format');
-			// return;
+			throw new Error('Invalid object data format');
 		}
 
-		const database_id = process.env.NOTION_RESTAURANT_DATABASE_ID;
-
-		if (!database_id) {
-			return res.status(400).json({ message: 'Database ID is required', error: true });
-			// console.error('Database ID is required');
-			// return;
+		return messageData;
+	} catch (error) {
+		if (error instanceof Error) {
+			throw new Error('Failed to parse OpenAI response: ' + error.message);
 		}
+		else {
+			throw new Error('Failed to parse OpenAI response: ' + error);
+		}
+	}
+}
+
+const updateNotionDatabase = async (messageData: MessageData, url: string, personalNote?: string) => {
+	try {
+		console.log('Updating Notion database with');
+		const database_id = process.env.NOTION_RESTAURANT_DATABASE_ID ?? '';
 
 		const loggedRestaurants = await notion.databases.query({ database_id });
+
 		// get all handles
 		const handles = loggedRestaurants.results.map((restaurant) => ((restaurant as PageObjectResponse)?.properties?.Handle as PageObjectResponse["properties"][string] & { type: "rich_text" })?.rich_text?.[0]?.plain_text)
+		console.log('Previous handles:', handles.join(', '))
 
 		// Update Notion Database
 		const added: string[] = []
@@ -146,10 +135,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		const upvoted: string[] = []
 		await Promise.all(messageData.restaurants.map(async (restaurant) => {
 			const { name, handle, type, occasion, price, location, notes } = restaurant;
+			console.log('Processing restaurant:', `${name} (${handle})`)
 
 			// Validate required fields
 			if (!name || !handle) {
-				console.error('Missing required fields:', restaurant);
+				console.error('Missing required fields (name OR handle):', restaurant);
 				failed.push(name || 'Unknown');
 				return;
 			}
@@ -162,6 +152,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 			if (existingRestaurantIndex !== -1) {
 				// Existing restaurant found, get its page ID
 				const existingPageId = loggedRestaurants.results[existingRestaurantIndex].id;
+
+				console.log('Existing restaurant found: ', existingPageId);
 
 				try {
 					// Increment the count by retrieving the current value and adding 1
@@ -209,6 +201,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 					failed.push(name);
 				}
 			} else {
+				console.log('Creating a new page in database',);
 				// No existing restaurant found, proceed to create a new one
 				const blocks: Array<BlockObjectRequest> = []
 				if (notes) {
@@ -264,22 +257,53 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 			respMessageArray.push(`Failed: ${failed.join(', ')}`)
 		}
 		console.log('Notion database updated:', respMessageArray.join(' | '));
-		res.status(200).json({ message: respMessageArray.join(' | '), error: false });
-
-		// console.log('Background task completed');
-		// } catch (error) {
-		// 	console.error('Background task failed:', error);
-		// 	// Implement error handling or logging as needed
-		// }
-		// });
-	}
-	catch (error) {
-		console.error('Failed to update Notion database:', error);
+	} catch (error) {
 		if (error instanceof Error) {
-			res.status(500).json({ message: error.message, error: true });
+			throw new Error('Failed to update Notion database: ' + error.message);
 		}
 		else {
-			res.status(500).json({ message: 'Internal Server Error', error: true });
+			throw new Error('Failed to update Notion database: ' + error);
+		}
+	}
+}
+
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+	try {
+		// Check if the request method is POST
+		if (req.method !== 'POST') {
+			return res.status(405).end(); // Method Not Allowed
+		}
+
+		// Simple Authentication Check
+		const { authorization } = req.headers;
+
+		if (!authorization || authorization !== `Bearer ${process.env.PHONE_SECRET_KEY}`) {
+			return res.status(401).json({ message: 'Unauthorized' });
+		}
+
+		// Assuming the URL is sent in the request body
+		const { url, personalNote } = req.body;
+
+		if (!url) {
+			return res.status(400).json({ message: 'URL is required' });
+		}
+
+		// Immediately respond to the client
+		res.status(200).json({ message: 'Valid request received, processing in background' });
+
+		// Process background tasks
+		const title = await fetchMetaContentFromUrl(url);
+		const messageData = await askOpenAI(title);
+		await updateNotionDatabase(messageData, url, personalNote);
+
+	}
+	catch (error) {
+		if (error instanceof Error) {
+			res.status(500).json({ message: error.message });
+		}
+		else {
+			res.status(500).json({ message: 'Internal Server Error' });
 		}
 	}
 }
