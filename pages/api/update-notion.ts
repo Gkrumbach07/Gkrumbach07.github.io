@@ -296,11 +296,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		}
 
 		// Immediately respond to the client
-		res.status(200).json({ message: 'Valid request received, processing in background' });
 
 		// Process background tasks (no await)
-		runBackgroundTasks(url, personalNote)
+		await runBackgroundTasks(url, personalNote)
 
+		res.status(200).json({ message: 'Valid request received, processing in background' });
 
 	}
 	catch (error) {
