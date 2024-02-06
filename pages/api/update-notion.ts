@@ -43,8 +43,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		const { data } = await axios.get(url);
 
 		const $ = load(data);
-		const metaContent = $(`meta[property='og:title']`).attr('content');
-		const title = metaContent || 'Not found';
+		const metaContentTitle = $(`meta[property='og:title']`).attr('content');
+		const metaContentDescription = $(`meta[property='og:description']`).attr('content');
+
+		if (!metaContentTitle || !metaContentDescription) {
+			return res.status(400).json({ message: 'Failed to parse meta data', error: true });
+		}
+
+		const title = `${metaContentTitle}. ${metaContentDescription}`
 
 		console.debug('Restaurant og:title from URL:', title);
 
@@ -55,7 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 		// Use OpenAI to parse the text
 		const openAiResponse = await openai.chat.completions.create({
-			messages: [{ role: "user", content: `Extract each restaurant's details into a json blob with key "restaurants" and value an array of objects with keys for "name" as a string, "handle" as a string, "type" of food as a string, estimated "price" as a number if available, "occasion" as an array of strings (breakfast, lunch, dinner, brunch, snack, late night) multiple if needed, "location" if available as a string, "notes" a short description or interesting notes. If any are unavailable set the value to null: ${title}` }],
+			messages: [{ role: "user", content: `DIRECTIONS: Extract each restaurant's details into a json blob with key "restaurants" and value an array of objects with keys for "name" as a string, "handle" as a string, "type" of food as a string, estimated "price" as a number if available, "occasion" as an array of strings (breakfast, lunch, dinner, brunch, snack, late night) multiple if needed, "location" if available as a string, "notes" a short description or interesting notes. If any are unavailable set the value to null. TEXT: ${title}` }],
 			model: "gpt-3.5-turbo",
 		});
 
