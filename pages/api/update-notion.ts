@@ -1,3 +1,6 @@
+export const maxDuration = 25;
+
+
 import { Client } from "@notionhq/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
