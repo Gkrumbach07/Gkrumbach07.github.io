@@ -64,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 				const title = `${metaContentTitle}. ${metaContentDescription}`
 
-				console.debug('Restaurant og:title from URL:', title);
+				console.log('Restaurant og:title from URL:', title);
 
 				const notion = new Client({ auth: process.env.NOTION_RESTAURANT_API_KEY });
 				const openai = new OpenAI({
@@ -108,7 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 					return;
 				}
 
-				console.debug('OpenAI response:', message);
+				console.log('OpenAI response:', message);
 				let messageData: MessageData = { restaurants: [] };
 				try {
 					messageData = JSON.parse(message);
@@ -266,7 +266,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 				if (failed.length > 0) {
 					respMessageArray.push(`Failed: ${failed.join(', ')}`)
 				}
-				console.debug('Notion database updated:', respMessageArray.join(' | '));
+				console.log('Notion database updated:', respMessageArray.join(' | '));
 				// res.status(200).json({ message: respMessageArray.join(' | '), error: false });
 
 				console.log('Background task completed');
