@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import { load } from 'cheerio';
 import axios from "axios";
-import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+import { BlockObjectRequest, PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 
 type Restaurant = {
 	name?: string;
@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		}
 
 		// Assuming the URL is sent in the request body
-		const { url } = req.body;
+		const { url, personalNote } = req.body;
 
 		if (!url) {
 			return res.status(400).json({ message: 'URL is required', error: true });
@@ -139,6 +139,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 							],
 						});
 					}
+					if (personalNote) {
+						await notion.blocks.children.append({
+							block_id: existingPageId,
+							children: [
+								{
+									object: 'block',
+									type: 'quote',
+									quote: {
+										rich_text: [{ type: "text", text: { content: personalNote } }],
+									},
+								},
+							],
+						});
+					}
 
 					upvoted.push(name); // Assuming 'upvoted' means handled or updated in this context
 				} catch (error) {
@@ -147,6 +161,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 				}
 			} else {
 				// No existing restaurant found, proceed to create a new one
+				const blocks: Array<BlockObjectRequest> = []
+				if (notes) {
+					blocks.push({
+						object: 'block',
+						type: 'paragraph',
+						paragraph: {
+							rich_text: [{ type: 'text', text: { content: notes } }],
+						},
+					})
+				}
+				if (personalNote) {
+					blocks.push({
+						object: 'block',
+						type: 'quote',
+						quote: {
+							rich_text: [{ type: 'text', text: { content: personalNote } }],
+						},
+					})
+				}
 				try {
 					await notion.pages.create({
 						parent: { database_id },
@@ -160,15 +193,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 							...(location ? { Location: { rich_text: [{ text: { content: location } }] } } : {}),
 							Count: { number: 1 }, // Initialize count for new restaurant
 						},
-						children: notes ? [
-							{
-								object: 'block',
-								type: 'paragraph',
-								paragraph: {
-									rich_text: [{ type: 'text', text: { content: notes } }],
-								},
-							},
-						] : [],
+						children: blocks
 					});
 
 					added.push(name);
