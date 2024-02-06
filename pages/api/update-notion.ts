@@ -268,6 +268,12 @@ const updateNotionDatabase = async (messageData: MessageData, url: string, perso
 }
 
 
+const runBackgroundTasks = async (url: string, personalNote: string) => {
+	const title = await fetchMetaContentFromUrl(url);
+	const messageData = await askOpenAI(title);
+	await updateNotionDatabase(messageData, url, personalNote);
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
 		// Check if the request method is POST
@@ -292,10 +298,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		// Immediately respond to the client
 		res.status(200).json({ message: 'Valid request received, processing in background' });
 
-		// Process background tasks
-		const title = await fetchMetaContentFromUrl(url);
-		const messageData = await askOpenAI(title);
-		await updateNotionDatabase(messageData, url, personalNote);
+		// Process background tasks (no await)
+		runBackgroundTasks(url, personalNote)
+
 
 	}
 	catch (error) {
