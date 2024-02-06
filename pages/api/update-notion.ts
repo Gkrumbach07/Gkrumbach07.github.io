@@ -57,7 +57,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 				const metaContentDescription = $(`meta[property='og:description']`).attr('content');
 
 				if (!metaContentTitle || !metaContentDescription) {
-					return res.status(400).json({ message: 'Failed to parse meta data', error: true });
+					// return res.status(400).json({ message: 'Failed to parse meta data', error: true });
+					console.error('Failed to parse meta data');
+					return;
 				}
 
 				const title = `${metaContentTitle}. ${metaContentDescription}`
@@ -87,17 +89,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 				// Use OpenAI to parse the text
 				const openAiResponse = await openai.chat.completions.create({
+					response_format: {
+						type: "json_object"
+					},
 					messages: [{
 						role: "user",
 						content: prompt
-					}], model: "gpt-4",
+					}],
+					model: "gpt-4",
 				});
 
 				// Simplified parsing logic here - you would extract specifics like name, type of food, etc.
 				const message = openAiResponse.choices[0].message.content
 
 				if (!message) {
-					return res.status(400).json({ message: 'Failed to parse data', error: true });
+					// return res.status(400).json({ message: 'Failed to parse data', error: true });
+					console.error('Failed to parse data');
+					return;
 				}
 
 				console.debug('OpenAI response:', message);
@@ -118,13 +126,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 				// validate the parsed data
 				if (!Array.isArray(messageData.restaurants)) {
-					return res.status(400).json({ message: 'Invalid data format', error: true });
+					// return res.status(400).json({ message: 'Invalid data format', error: true });
+					console.error('Invalid data format');
+					return;
 				}
 
 				const database_id = process.env.NOTION_RESTAURANT_DATABASE_ID;
 
 				if (!database_id) {
-					return res.status(400).json({ message: 'Database ID is required', error: true });
+					// return res.status(400).json({ message: 'Database ID is required', error: true });
+					console.error('Database ID is required');
+					return;
 				}
 
 				const loggedRestaurants = await notion.databases.query({ database_id });
@@ -255,7 +267,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 					respMessageArray.push(`Failed: ${failed.join(', ')}`)
 				}
 				console.debug('Notion database updated:', respMessageArray.join(' | '));
-				res.status(200).json({ message: respMessageArray.join(' | '), error: false });
+				// res.status(200).json({ message: respMessageArray.join(' | '), error: false });
 
 				console.log('Background task completed');
 			} catch (error) {
