@@ -61,8 +61,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 		// Use OpenAI to parse the text
 		const openAiResponse = await openai.chat.completions.create({
-			messages: [{ role: "user", content: `DIRECTIONS: Extract each restaurant's details into a json blob with key "restaurants" and value an array of objects with keys for "name" as a string, "handle" as a string, "type" of food as a string, estimated "price" as a number if available, "occasion" as an array of strings (breakfast, lunch, dinner, brunch, snack, late night) multiple if needed, "location" if available as a string, "notes" a short description or interesting notes. If any are unavailable set the value to null. TEXT: ${title}` }],
-			model: "gpt-3.5-turbo",
+			messages: [{
+				role: "user",
+				content: `Task: Create a JSON blob for restaurant details.
+				- Format the output as JSON.
+				- Key: "restaurants", Value: Array of objects.
+				- Each object should have:
+					* "name": (string) The restaurant's name.
+					* "handle": (string) The restaurant's social media handle or identifier.
+					* "type": (string) Type of food served.
+					* "price": (number) Estimated price, use null if unavailable.
+					* "occasion": (array of strings) Possible occasions, e.g., ["breakfast", "lunch"].
+					* "location": (string) Location, use null if unavailable.
+					* "notes": (string) Any interesting notes or description, use null if unavailable.
+				- If information for a key is unavailable, set its value to null.
+				TEXT: ${title}`
+			}], model: "gpt-3.5-turbo",
 		});
 
 		// Simplified parsing logic here - you would extract specifics like name, type of food, etc.
