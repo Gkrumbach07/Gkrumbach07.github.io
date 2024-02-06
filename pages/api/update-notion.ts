@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		}
 
 		// Immediately respond to the client
-		res.status(200).json({ message: 'Valid request received, processing in background' });
+		// res.status(200).json({ message: 'Valid request received, processing in background' });
 
 		// // Background task
 		// setImmediate(async () => {
