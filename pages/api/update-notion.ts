@@ -264,7 +264,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 			respMessageArray.push(`Failed: ${failed.join(', ')}`)
 		}
 		console.log('Notion database updated:', respMessageArray.join(' | '));
-		// res.status(200).json({ message: respMessageArray.join(' | '), error: false });
+		res.status(200).json({ message: respMessageArray.join(' | '), error: false });
 
 		// console.log('Background task completed');
 		// } catch (error) {
