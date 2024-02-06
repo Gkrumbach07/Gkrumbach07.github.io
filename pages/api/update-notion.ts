@@ -80,7 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 			messages: [{
 				role: "user",
 				content: prompt
-			}], model: "gpt-5",
+			}], model: "gpt-4",
 		});
 
 		// Simplified parsing logic here - you would extract specifics like name, type of food, etc.
