@@ -92,9 +92,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 		// Use OpenAI to parse the text
 		const openAiResponse = await openai.chat.completions.create({
-			response_format: {
-				type: "json_object"
-			},
 			messages: [{
 				role: "user",
 				content: prompt
