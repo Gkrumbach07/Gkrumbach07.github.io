@@ -59,23 +59,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 			apiKey: process.env.OPENAI_API_KEY,
 		});
 
+		const prompt = `Task: Create a JSON blob for restaurant details.
+		- Format the output as JSON.
+		- Key: "restaurants", Value: Array of objects.
+		- Each object should have:
+			* "name": (string) The restaurant's name.
+			* "handle": (string) The restaurant's social media handle or identifier.
+			* "type": (string) Type of food served.
+			* "price": (number) Estimated price, use null if unavailable.
+			* "occasion": (array of strings) Possible occasions, e.g., ["breakfast", "lunch"].
+			* "location": (string) Location, use null if unavailable.
+			* "notes": (string) Any interesting notes or description, use null if unavailable.
+		- If information for a key is unavailable, set its value to null.
+		TEXT: ${title}`
+
+		console.log('OpenAI prompt:', prompt)
+
 		// Use OpenAI to parse the text
 		const openAiResponse = await openai.chat.completions.create({
 			messages: [{
 				role: "user",
-				content: `Task: Create a JSON blob for restaurant details.
-				- Format the output as JSON.
-				- Key: "restaurants", Value: Array of objects.
-				- Each object should have:
-					* "name": (string) The restaurant's name.
-					* "handle": (string) The restaurant's social media handle or identifier.
-					* "type": (string) Type of food served.
-					* "price": (number) Estimated price, use null if unavailable.
-					* "occasion": (array of strings) Possible occasions, e.g., ["breakfast", "lunch"].
-					* "location": (string) Location, use null if unavailable.
-					* "notes": (string) Any interesting notes or description, use null if unavailable.
-				- If information for a key is unavailable, set its value to null.
-				TEXT: ${title}`
+				content: prompt
 			}], model: "gpt-3.5-turbo",
 		});
 
