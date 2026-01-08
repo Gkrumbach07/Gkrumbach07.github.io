@@ -1,36 +1,177 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio Website
+
+A modern, developer-focused portfolio website built with Next.js, featuring dynamic GitHub integration for projects and blog posts.
+
+## Features
+
+- **GitHub-Powered Blog**: Blog posts stored as markdown files in a GitHub repository with frontmatter metadata
+- **Dynamic Projects**: Automatically fetches and displays GitHub repositories
+- **Recent Activity**: Shows your latest GitHub activity
+- **Dark Mode**: Full dark mode support with theme switching
+- **Responsive Design**: Mobile-first, responsive layout
+- **Terminal Aesthetic**: Developer-friendly UI with terminal-inspired elements
+- **Interactive Components**: Animated landscape scene, sundial, backpacking map, and more
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ installed
+- A GitHub account and personal access token
+- A GitHub repository for storing blog posts (optional, but recommended)
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yourusername/portfolio.git
+cd portfolio
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create a `.env.local` file (see Configuration section below)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open [http://localhost:3000](http://localhost:3000) to view your portfolio
 
-To learn more about Next.js, take a look at the following resources:
+## Configuration
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Create a `.env.local` file in the root directory:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# GitHub Personal Access Token (create at: https://github.com/settings/tokens)
+GITHUB_TOKEN=ghp_your_token_here
 
-## Deploy on Vercel
+# Your GitHub username
+GITHUB_USERNAME=your_username
+NEXT_PUBLIC_GITHUB_USERNAME=your_username
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Blog repository (format: username/repo-name)
+GITHUB_BLOG_REPO=your_username/blog
+GITHUB_BLOG_BRANCH=main
+GITHUB_BLOG_PATH=posts
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Creating a GitHub Personal Access Token
+
+1. Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click "Generate new token (classic)"
+3. Select scopes: `repo` (for private repos) or `public_repo` (for public repos)
+4. Copy the token and add it to `.env.local`
+
+## Blog Setup
+
+Blog posts are stored in the `content/posts/` directory of this repository.
+
+### Quick Start
+
+1. **Example posts are already included!** Check `content/posts/` for examples
+
+2. **Create new posts** using the template:
+
+```bash
+cp BLOG_POST_TEMPLATE.md content/posts/my-new-post.md
+```
+
+3. **Add frontmatter** at the top of each post:
+
+```markdown
+---
+title: "My First Post"
+excerpt: "A brief description"
+date: "2025-01-04"
+pinned: true
+tags: ["javascript", "react"]
+---
+
+# Your content here...
+```
+
+4. **Commit and push** to GitHub:
+
+```bash
+git add content/posts/my-new-post.md
+git commit -m "Add new blog post"
+git push
+```
+
+See [BLOG_SETUP.md](./BLOG_SETUP.md) for detailed instructions.
+
+## Project Structure
+
+```
+portfolio/
+├── app/                    # Next.js app directory
+│   ├── blog/              # Blog pages
+│   ├── projects/          # Projects page
+│   └── about/             # About page
+├── components/            # React components
+├── content/               # Blog content
+│   └── posts/            # Blog post markdown files
+├── lib/                   # Utility functions
+│   ├── blog.ts           # Blog post fetching
+│   ├── github-blog.ts    # GitHub API integration
+│   ├── github.ts         # GitHub repos/activity
+│   └── markdown.ts       # Markdown rendering
+└── public/               # Static assets
+```
+
+## Key Components
+
+- **Hero Section**: Animated introduction with terminal prompt
+- **Landscape Scene**: Interactive SVG landscape with parallax
+- **Sundial**: Real-time sundial based on your location
+- **Recent Activity**: GitHub activity feed
+- **Featured Projects**: Highlighted GitHub repositories
+- **Blog**: Markdown-powered blog with GitHub backend
+
+## Technologies Used
+
+- **Framework**: Next.js 16 (App Router)
+- **Styling**: Tailwind CSS 4
+- **UI Components**: Radix UI
+- **Animations**: React Spring
+- **Markdown**: gray-matter, remark
+- **Icons**: Lucide React
+- **Maps**: Mapbox GL
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Import the project in Vercel
+3. Add your environment variables in Vercel project settings
+4. Deploy!
+
+### Other Platforms
+
+The project can be deployed to any platform that supports Next.js:
+
+```bash
+npm run build
+npm start
+```
+
+## Customization
+
+- Update personal information in components
+- Modify color scheme in `app/globals.css`
+- Customize components in `components/`
+- Add/remove sections in `app/page.tsx`
+
+## License
+
+MIT License - feel free to use this template for your own portfolio!
+
+## Credits
+
+Built with [Next.js](https://nextjs.org), deployed on [Vercel](https://vercel.com)
