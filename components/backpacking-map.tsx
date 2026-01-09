@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useTheme } from "./theme-provider"
-import { MapPin, Footprints, Tent, Ship, X } from "lucide-react"
+import { MapPin, Footprints, Tent, Ship, X, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import mapboxgl from "mapbox-gl"
@@ -58,6 +58,7 @@ export function BackpackingMap({ mapboxToken }: BackpackingMapProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [imageExpanded, setImageExpanded] = useState(false)
   const [imageLoading, setImageLoading] = useState(false)
+  const [thumbnailLoading, setThumbnailLoading] = useState(true)
   const { isDark } = useTheme()
   const initialStyleRef = useRef(isDark)
 
@@ -103,6 +104,7 @@ export function BackpackingMap({ mapboxToken }: BackpackingMapProps) {
         el.addEventListener("click", () => {
           setSelectedIndex(index)
           setImageExpanded(false)
+          setThumbnailLoading(true)
         })
 
         const marker = new mapboxgl.Marker({ element: el })
@@ -130,6 +132,7 @@ export function BackpackingMap({ mapboxToken }: BackpackingMapProps) {
 
   const handleLocationClick = (index: number) => {
     setSelectedIndex(index)
+    setThumbnailLoading(true)
     const location = trailLocations[index]
     if (map.current) {
       map.current.flyTo({
@@ -197,7 +200,7 @@ export function BackpackingMap({ mapboxToken }: BackpackingMapProps) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4">
         {/* List */}
-        <div className="bg-card border border-border rounded-xl p-4 h-[400px] overflow-y-auto">
+        <div className="bg-card border border-border rounded-xl p-4 h-[280px] md:h-[400px] overflow-y-auto">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
             <MapPin className="w-4 h-4 text-primary" />
             <span className="font-mono text-sm">{trailLocations.length} places</span>
@@ -206,7 +209,7 @@ export function BackpackingMap({ mapboxToken }: BackpackingMapProps) {
         </div>
 
         {/* Map placeholder */}
-        <div className="relative h-[400px] rounded-xl overflow-hidden border border-border bg-gradient-to-br from-emerald-900/20 to-blue-900/20">
+        <div className="relative h-[280px] md:h-[400px] rounded-xl overflow-hidden border border-border bg-gradient-to-br from-emerald-900/20 to-blue-900/20">
           <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
             <MapPin className="w-8 h-8 text-primary mb-4 opacity-50" />
             <p className="text-sm text-muted-foreground text-center">Map requires Mapbox token</p>
@@ -247,9 +250,11 @@ export function BackpackingMap({ mapboxToken }: BackpackingMapProps) {
         {/* Expanded image overlay */}
         {selectedLocation && imageExpanded && (
           <div className="absolute inset-0 z-20">
-            {/* Loading skeleton */}
+            {/* Loading spinner */}
             {imageLoading && (
-              <div className="absolute inset-0 bg-gradient-to-br from-muted via-background to-muted animate-pulse" />
+              <div className="absolute inset-0 flex items-center justify-center bg-muted/80 backdrop-blur-sm z-10">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
             )}
             
             <Image
@@ -288,14 +293,23 @@ export function BackpackingMap({ mapboxToken }: BackpackingMapProps) {
                 onClick={handleImageClick}
                 className="relative w-32 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-muted hover:ring-2 hover:ring-primary/50 transition-all cursor-zoom-in"
               >
+                {thumbnailLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-muted z-10">
+                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  </div>
+                )}
                 <Image
                   src={`/${selectedLocation.image}`}
                   alt={selectedLocation.name}
                   fill
-                  className="object-cover"
+                  className={cn(
+                    "object-cover transition-opacity duration-300",
+                    thumbnailLoading ? "opacity-0" : "opacity-100"
+                  )}
                   priority
+                  onLoad={() => setThumbnailLoading(false)}
                   onError={(e) => {
-                    // Hide image on error
+                    setThumbnailLoading(false)
                     e.currentTarget.style.display = 'none'
                   }}
                 />

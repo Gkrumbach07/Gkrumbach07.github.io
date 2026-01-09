@@ -58,26 +58,41 @@ export function RepositoryContributionCard({ repository }: RepositoryContributio
   
   const totalPRs =
     currentRepo.totalPullRequestsOpen +
-    currentRepo.totalPullRequestsClosed +
     currentRepo.totalPullRequestsMerged
 
   return (
-    <div className="border border-border rounded-lg p-6 bg-background hover:border-primary/50 transition-colors flex flex-col h-full">
+    <div className="border border-border rounded-lg p-4 md:p-6 bg-background hover:border-primary/50 transition-colors flex flex-col h-full">
       {/* Repository name with total activity change */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2 md:mb-4">
         <Link
           href={currentRepo.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-mono text-lg font-semibold text-foreground hover:text-primary transition-colors"
+          className="font-mono text-sm md:text-lg font-semibold text-foreground hover:text-primary transition-colors truncate mr-2"
         >
           {currentRepo.nameWithOwner}
         </Link>
         <ChangeIndicator change={currentRepo.totalActivityChange} />
       </div>
 
-      {/* Metrics - each on own line */}
-      <div className="space-y-2">
+      {/* Mobile: Condensed inline metrics */}
+      <div className="flex md:hidden items-center gap-4 text-sm">
+        <div className="flex items-center gap-1.5">
+          <GitCommit className="w-3.5 h-3.5 text-green-600" />
+          <span className="font-bold">{currentRepo.totalCommits}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <GitPullRequest className="w-3.5 h-3.5 text-purple-600" />
+          <span className="font-bold">{totalPRs}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Eye className="w-3.5 h-3.5 text-blue-600" />
+          <span className="font-bold">{currentRepo.totalReviews}</span>
+        </div>
+      </div>
+
+      {/* Desktop: Full metrics - each on own line */}
+      <div className="hidden md:block space-y-2">
         {/* Commits */}
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Commits</span>
@@ -93,12 +108,6 @@ export function RepositoryContributionCard({ repository }: RepositoryContributio
                 <Badge className="h-5 rounded-full px-2 bg-green-500 hover:bg-green-500 dark:bg-green-600 dark:hover:bg-green-600 text-white">
                   <span className="font-mono tabular-nums font-semibold">{currentRepo.totalPullRequestsOpen}</span>
                   <span className="ml-1">open</span>
-                </Badge>
-              )}
-              {currentRepo.totalPullRequestsClosed > 0 && (
-                <Badge className="h-5 rounded-full px-2 bg-red-500 hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-600 text-white">
-                  <span className="font-mono tabular-nums font-semibold">{currentRepo.totalPullRequestsClosed}</span>
-                  <span className="ml-1">closed</span>
                 </Badge>
               )}
               {currentRepo.totalPullRequestsMerged > 0 && (
@@ -125,9 +134,9 @@ export function RepositoryContributionCard({ repository }: RepositoryContributio
       {/* Monthly activity chart */}
       <MonthlyActivityChart monthlyActivity={currentRepo.monthlyActivity} />
       
-      {/* Footer with repo switcher (only if variants exist) */}
+      {/* Footer with repo switcher (only if variants exist) - desktop only */}
       {hasVariants && (
-        <div className="mt-4 pt-4 border-t border-border">
+        <div className="hidden md:block mt-4 pt-4 border-t border-border">
           <Select value={selectedVariant || repository.nameWithOwner} onValueChange={setSelectedVariant}>
             <SelectTrigger className="w-full text-xs h-8 hover:bg-accent">
               <SelectValue>
@@ -148,7 +157,7 @@ export function RepositoryContributionCard({ repository }: RepositoryContributio
                     </div>
                     <div className="flex items-center gap-1">
                       <GitPullRequest className="w-3 h-3" />
-                      <span>{repository.totalPullRequestsOpen + repository.totalPullRequestsClosed + repository.totalPullRequestsMerged}</span>
+                      <span>{repository.totalPullRequestsOpen + repository.totalPullRequestsMerged}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Eye className="w-3 h-3" />
@@ -158,7 +167,7 @@ export function RepositoryContributionCard({ repository }: RepositoryContributio
                 </div>
               </SelectItem>
               {repository.forkVariants?.map((variant) => {
-                const variantTotalPRs = variant.totalPullRequestsOpen + variant.totalPullRequestsClosed + variant.totalPullRequestsMerged
+                const variantTotalPRs = variant.totalPullRequestsOpen + variant.totalPullRequestsMerged
                 return (
                   <SelectItem 
                     key={variant.nameWithOwner} 

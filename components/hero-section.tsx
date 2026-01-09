@@ -14,8 +14,8 @@ export function HeroSection() {
       {/* Landscape background */}
       <LandscapeScene />
 
-      {/* Sundial control - top right */}
-      <div className="absolute top-6 right-6 z-50">
+      {/* Sundial control - top right (hidden on mobile) */}
+      <div className="hidden md:block absolute top-6 right-6 z-50">
         <Sundial />
       </div>
 

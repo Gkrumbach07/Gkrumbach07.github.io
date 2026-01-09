@@ -2,8 +2,7 @@ import { ContentLayout } from "@/components/content-layout"
 import { SectionHeader } from "@/components/section-header"
 import { BlogCard } from "@/components/blog-card"
 import { getAllPosts } from "@/lib/blog"
-import { Terminal, Rss } from "lucide-react"
-import Link from "next/link"
+import { Terminal } from "lucide-react"
 
 export const metadata = {
   title: "Blog | Gage Krumbach",
@@ -26,22 +25,12 @@ export default async function BlogPage() {
             <span className="font-mono text-sm text-muted-foreground">~/blog</span>
           </div>
 
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Blog</h1>
-              <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-                Thoughts on technology, ai, nature, and the
-                perfect cup of coffee.
-              </p>
-            </div>
-
-            <Link
-              href="/rss.xml"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-mono text-muted-foreground hover:text-foreground border border-border rounded-md transition-colors"
-            >
-              <Rss className="w-4 h-4" />
-              RSS
-            </Link>
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Blog</h1>
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
+              Thoughts on technology, ai, nature, and the
+              perfect cup of coffee.
+            </p>
           </div>
         </div>
       </section>

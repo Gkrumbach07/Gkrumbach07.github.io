@@ -71,6 +71,7 @@ export type RepositoryContribution = {
   pullRequestsChange: number
   reviewsChange: number
   totalActivityChange: number
+  lastActivityDate: string // ISO date string of most recent activity
   forkVariants?: RepositoryContribution[]
 }
 
@@ -251,6 +252,7 @@ export async function getRepositoryContributions(): Promise<RepositoryContributi
     const monthlyDataByRepo: { [month: string]: MonthlyData } = {}
     const repoUrls: { [repoName: string]: string } = {}
     const repoMetadata: { [repoName: string]: { isFork: boolean; parent: string | null } } = {}
+    const repoLastActivityDate: { [repoName: string]: string } = {} // Track most recent activity date per repo
     
     // Fetch 6 months of data
     for (let monthsAgo = 0; monthsAgo < 6; monthsAgo++) {
@@ -273,8 +275,11 @@ export async function getRepositoryContributions(): Promise<RepositoryContributi
                     url
                   }
                 }
-                contributions {
+                contributions(first: 100) {
                   totalCount
+                  nodes {
+                    occurredAt
+                  }
                 }
               }
               
@@ -292,6 +297,7 @@ export async function getRepositoryContributions(): Promise<RepositoryContributi
                 contributions(first: 100) {
                   totalCount
                   nodes {
+                    occurredAt
                     pullRequest {
                       state
                       merged
@@ -311,8 +317,11 @@ export async function getRepositoryContributions(): Promise<RepositoryContributi
                     url
                   }
                 }
-                contributions {
+                contributions(first: 100) {
                   totalCount
+                  nodes {
+                    occurredAt
+                  }
                 }
               }
             }
@@ -382,6 +391,14 @@ export async function getRepositoryContributions(): Promise<RepositoryContributi
           url: repository.url,
         }
       }
+      
+      // Helper: Update the most recent activity date for a repo
+      const updateLastActivityDate = (repoName: string, dateStr: string) => {
+        if (!dateStr) return
+        if (!repoLastActivityDate[repoName] || dateStr > repoLastActivityDate[repoName]) {
+          repoLastActivityDate[repoName] = dateStr
+        }
+      }
 
       // Process commits
       collection.commitContributionsByRepository?.forEach((repo: any) => {
@@ -411,6 +428,13 @@ export async function getRepositoryContributions(): Promise<RepositoryContributi
         }
         
         monthlyDataByRepo[monthKey][repoName].commits = repo.contributions.totalCount
+        
+        // Track most recent commit date
+        repo.contributions.nodes?.forEach((node: any) => {
+          if (node?.occurredAt) {
+            updateLastActivityDate(repoName, node.occurredAt)
+          }
+        })
       })
 
       // Process pull requests
@@ -446,6 +470,11 @@ export async function getRepositoryContributions(): Promise<RepositoryContributi
         
         repo.contributions.nodes?.forEach((node: any) => {
           if (!node?.pullRequest) return
+          
+          // Track most recent PR date
+          if (node.occurredAt) {
+            updateLastActivityDate(repoName, node.occurredAt)
+          }
           
           if (node.pullRequest.state === "OPEN") {
             openCount++
@@ -490,6 +519,13 @@ export async function getRepositoryContributions(): Promise<RepositoryContributi
         }
         
         monthlyDataByRepo[monthKey][repoName].reviews = repo.contributions.totalCount
+        
+        // Track most recent review date
+        repo.contributions.nodes?.forEach((node: any) => {
+          if (node?.occurredAt) {
+            updateLastActivityDate(repoName, node.occurredAt)
+          }
+        })
       })
     }
 
@@ -559,6 +595,7 @@ export async function getRepositoryContributions(): Promise<RepositoryContributi
         pullRequestsChange,
         reviewsChange,
         totalActivityChange,
+        lastActivityDate: repoLastActivityDate[repoName] || new Date(0).toISOString(),
       }
     })
 
@@ -627,28 +664,15 @@ export async function getRepositoryContributions(): Promise<RepositoryContributi
       })
     })
 
-    // Sort by most recent activity date
+    // Sort by most recent activity date (using actual timestamps from commits, PRs, and reviews)
     const sortedRepos = Object.values(repoContributions).sort((a, b) => {
-      // Find the most recent month with activity for each repo (iterate from newest to oldest)
-      const findLastActivityIndex = (repo: RepositoryContribution) => {
-        for (let i = repo.monthlyActivity.length - 1; i >= 0; i--) {
-          const month = repo.monthlyActivity[i]
-          if (month.commits > 0 || month.pullRequests > 0 || month.reviews > 0) {
-            return i
-          }
-        }
-        return -1
+      // Primary sort: by actual last activity date (most recent first)
+      // ISO date strings can be compared lexicographically
+      if (b.lastActivityDate !== a.lastActivityDate) {
+        return b.lastActivityDate.localeCompare(a.lastActivityDate)
       }
       
-      const lastActivityA = findLastActivityIndex(a)
-      const lastActivityB = findLastActivityIndex(b)
-      
-      // Sort by most recent activity (higher index = more recent)
-      if (lastActivityB !== lastActivityA) {
-        return lastActivityB - lastActivityA
-      }
-      
-      // If same month, sort by total activity
+      // Fallback: sort by total activity across all months
       const totalA = a.totalCommits + a.totalPullRequestsOpen + a.totalPullRequestsClosed + a.totalPullRequestsMerged + a.totalReviews
       const totalB = b.totalCommits + b.totalPullRequestsOpen + b.totalPullRequestsClosed + b.totalPullRequestsMerged + b.totalReviews
       return totalB - totalA
