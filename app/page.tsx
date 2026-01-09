@@ -8,6 +8,34 @@ import { getPinnedRepos, getRepositoryContributions } from "@/lib/github"
 import { getPinnedPosts } from "@/lib/blog"
 import type { Project } from "@/components/project-card"
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gagekrumbach.com"
+
+// JSON-LD structured data for Person schema
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Gage Krumbach",
+  url: siteUrl,
+  jobTitle: "Software Engineer",
+  worksFor: {
+    "@type": "Organization",
+    name: "Red Hat",
+    url: "https://redhat.com",
+  },
+  sameAs: [
+    "https://github.com/gkrumbach07",
+    "https://linkedin.com/in/gage-krumbach/",
+  ],
+  knowsAbout: [
+    "Software Engineering",
+    "Kubernetes",
+    "Open Source",
+    "React",
+    "TypeScript",
+    "AI/ML",
+  ],
+}
+
 export default async function Home() {
   const [pinnedRepos, repositoryContributions, pinnedPosts] = await Promise.all([
     getPinnedRepos(),
@@ -28,14 +56,20 @@ export default async function Home() {
   }))
 
   return (
-    <main className="relative">
-      <Navigation isHomePage />
-      <HeroSection />
-      <FeaturedProjects projects={featuredProjects} />
-      <PinnedBlogs posts={pinnedPosts} />
-      <RecentActivity repositories={repositoryContributions} />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <main className="relative">
+        <Navigation isHomePage />
+        <HeroSection />
+        <FeaturedProjects projects={featuredProjects} />
+        <PinnedBlogs posts={pinnedPosts} />
+        <RecentActivity repositories={repositoryContributions} />
 
-      <Footer />
-    </main>
+        <Footer />
+      </main>
+    </>
   )
 }

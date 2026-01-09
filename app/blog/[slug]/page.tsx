@@ -5,13 +5,16 @@ import { notFound } from "next/navigation"
 import { Calendar, Clock, ArrowLeft } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
+import type { Metadata } from "next"
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gagekrumbach.com"
 
 export async function generateStaticParams() {
   const posts = await getAllPosts()
   return posts.map((post) => ({ slug: post.slug }))
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
   const post = await getPostBySlug(slug)
 
@@ -19,9 +22,33 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return { title: "Post Not Found" }
   }
 
+  const postUrl = `${siteUrl}/blog/${slug}`
+
   return {
-    title: `${post.title} | Gage Krumbach`,
+    title: post.title,
     description: post.excerpt,
+    keywords: post.tags,
+    authors: [{ name: "Gage Krumbach" }],
+    openGraph: {
+      type: "article",
+      url: postUrl,
+      title: post.title,
+      description: post.excerpt,
+      publishedTime: post.date,
+      authors: ["Gage Krumbach"],
+      tags: post.tags,
+      siteName: "Gage Krumbach",
+      // OG image is auto-generated from opengraph-image.tsx in this folder
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      // Twitter image uses the OG image from opengraph-image.tsx
+    },
+    alternates: {
+      canonical: postUrl,
+    },
   }
 }
 
@@ -39,8 +66,38 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     htmlContent = await markdownToHtml(post.content)
   }
 
+  // JSON-LD structured data for blog article
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.date,
+    dateModified: post.date,
+    author: {
+      "@type": "Person",
+      name: "Gage Krumbach",
+      url: siteUrl,
+    },
+    publisher: {
+      "@type": "Person",
+      name: "Gage Krumbach",
+      url: siteUrl,
+    },
+    url: `${siteUrl}/blog/${slug}`,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${siteUrl}/blog/${slug}`,
+    },
+    keywords: post.tags?.join(", "),
+  }
+
   return (
     <ContentLayout>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <article className="pt-32 pb-24 px-6 md:px-12 lg:px-24">
         <div className="container mx-auto">
           {/* Back link */}

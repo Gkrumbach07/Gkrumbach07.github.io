@@ -1,12 +1,31 @@
+import type { Metadata } from "next"
 import { ContentLayout } from "@/components/content-layout"
 import { BackpackingMap } from "@/components/backpacking-map"
 import { CoffeeSection } from "@/components/coffee-section"
 import { Terminal, MapPin, Github, Linkedin } from "lucide-react"
 import Link from "next/link"
 
-export const metadata = {
-  title: "About | Gage Krumbach",
-  description: "Software engineer at Red Hat, backpacker, and coffee enthusiast",
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gagekrumbach.com"
+
+export const metadata: Metadata = {
+  title: "About",
+  description: "Software engineer at Red Hat, backpacker, and coffee enthusiast. Learn more about my journey in tech and outdoor adventures.",
+  openGraph: {
+    type: "profile",
+    url: `${siteUrl}/about`,
+    title: "About | Gage Krumbach",
+    description: "Software engineer at Red Hat, backpacker, and coffee enthusiast.",
+    // Uses root opengraph-image.tsx
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About | Gage Krumbach",
+    description: "Software engineer at Red Hat, backpacker, and coffee enthusiast.",
+    // Uses root opengraph-image.tsx
+  },
+  alternates: {
+    canonical: `${siteUrl}/about`,
+  },
 }
 
 export default function AboutPage() {

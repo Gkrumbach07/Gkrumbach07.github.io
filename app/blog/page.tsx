@@ -1,12 +1,31 @@
+import type { Metadata } from "next"
 import { ContentLayout } from "@/components/content-layout"
 import { SectionHeader } from "@/components/section-header"
 import { BlogCard } from "@/components/blog-card"
 import { getAllPosts } from "@/lib/blog"
 import { Terminal } from "lucide-react"
 
-export const metadata = {
-  title: "Blog | Gage Krumbach",
-  description: "Writings about software engineering, open source, backpacking, and coffee",
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gagekrumbach.com"
+
+export const metadata: Metadata = {
+  title: "Blog",
+  description: "Writings about software engineering, open source, AI, backpacking, and coffee. Technical deep dives and personal explorations.",
+  openGraph: {
+    type: "website",
+    url: `${siteUrl}/blog`,
+    title: "Blog | Gage Krumbach",
+    description: "Writings about software engineering, open source, AI, backpacking, and coffee.",
+    // Uses root opengraph-image.tsx
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog | Gage Krumbach",
+    description: "Writings about software engineering, open source, AI, backpacking, and coffee.",
+    // Uses root opengraph-image.tsx
+  },
+  alternates: {
+    canonical: `${siteUrl}/blog`,
+  },
 }
 
 export default async function BlogPage() {
