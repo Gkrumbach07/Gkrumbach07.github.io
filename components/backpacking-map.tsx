@@ -198,7 +198,7 @@ export function BackpackingMap({ mapboxToken }: BackpackingMapProps) {
   // Show placeholder if no token
   if (!mapboxToken) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] lg:grid-cols-[360px_2fr] gap-4">
         {/* List */}
         <div className="bg-card border border-border rounded-xl p-4 h-[280px] md:h-[400px] overflow-y-auto">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
@@ -220,7 +220,7 @@ export function BackpackingMap({ mapboxToken }: BackpackingMapProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] lg:grid-cols-[360px_2fr] gap-4">
       {/* List */}
       <div className="bg-card border border-border rounded-xl p-4 h-[400px] overflow-y-auto">
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
