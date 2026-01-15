@@ -1,6 +1,6 @@
 "use client"
 
-import { Coffee, Thermometer, Clock, MapPin, Droplets, Move, Circle, Flame, Leaf, FlaskConical, ChevronDown } from "lucide-react"
+import { Coffee, Thermometer, Clock, MapPin, Droplets, Move, Circle, Flame, Leaf, FlaskConical, ChevronDown, History } from "lucide-react"
 import Link from "next/link"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { PourOverSimulator } from "./pour-over-simulator"
@@ -34,40 +34,14 @@ type CoffeeData = {
 }
 
 const currentCoffee: CoffeeData = {
-  name: "Holiday Blend",
-  url: "https://www.blackwhiteroasters.com/collections/the-coffee-archive/products/r-holiday-blend-tis-the-season-2025",
+  name: "Rodrigo Sanchez - Passion Fruit",
+  url: "https://www.blackwhiteroasters.com/products/r-rodrigo-sanchez-passion-fruit",
   roaster: "Black & White Coffee Roasters",
-  origin: "Mixed",
-  process: "Mixed",
-  roast: "Light-Medium",
-  variety: "Mixed",
-  blendComponents: [
-    {
-      name: "Ushirika",
-      percentage: 50,
-      origin: "Nyeri, Kenya",
-      process: "Washed",
-      variety: "SL28, SL34, Batian, Ruiru 11",
-      url: "https://www.blackwhiteroasters.com/collections/the-coffee-archive/products/r-ushirika-washed",
-    },
-    {
-      name: "Huver Castillo",
-      percentage: 25,
-      origin: "Buesaco, Nariño, Colombia",
-      process: "Anaerobic Honey",
-      variety: "Gesha",
-      url: "https://www.blackwhiteroasters.com/products/r-huver-castillo-anaerobic-honey-gesha",
-    },
-    {
-      name: "Esteban Zamora",
-      percentage: 25,
-      origin: "San Marcos, Tarrazú, Costa Rica",
-      process: "Cinnamon Anaerobic",
-      variety: "Caturra, Catuai",
-      url: "https://www.blackwhiteroasters.com/products/r-esteban-zamora-cinnamon-anaerobic",
-    },
-  ],
-  notes: ["Cinnamon Sugar", "Cherry Cobbler", "Chocolate"],
+  origin: "La Tacora, San Adolfo, Huila, Colombia",
+  process: "Co-ferment",
+  roast: "Light",
+  variety: "Purple Caturra",
+  notes: ["Passion Fruit Candy", "Mango Lassi", "Strawberry Jam", "Milk Tea"],
   brewMethod: "V60 Pour-Over",
   ratio: "1:16",
   temp: "90°C",
@@ -76,6 +50,52 @@ const currentCoffee: CoffeeData = {
   pours: "1-2",
   agitation: "Low",
 }
+
+const coffeeHistory: CoffeeData[] = [
+  {
+    name: "Holiday Blend",
+    url: "https://www.blackwhiteroasters.com/collections/the-coffee-archive/products/r-holiday-blend-tis-the-season-2025",
+    roaster: "Black & White Coffee Roasters",
+    origin: "Mixed",
+    process: "Mixed",
+    roast: "Light-Medium",
+    variety: "Mixed",
+    blendComponents: [
+      {
+        name: "Ushirika",
+        percentage: 50,
+        origin: "Nyeri, Kenya",
+        process: "Washed",
+        variety: "SL28, SL34, Batian, Ruiru 11",
+        url: "https://www.blackwhiteroasters.com/collections/the-coffee-archive/products/r-ushirika-washed",
+      },
+      {
+        name: "Huver Castillo",
+        percentage: 25,
+        origin: "Buesaco, Nariño, Colombia",
+        process: "Anaerobic Honey",
+        variety: "Gesha",
+        url: "https://www.blackwhiteroasters.com/products/r-huver-castillo-anaerobic-honey-gesha",
+      },
+      {
+        name: "Esteban Zamora",
+        percentage: 25,
+        origin: "San Marcos, Tarrazú, Costa Rica",
+        process: "Cinnamon Anaerobic",
+        variety: "Caturra, Catuai",
+        url: "https://www.blackwhiteroasters.com/products/r-esteban-zamora-cinnamon-anaerobic",
+      },
+    ],
+    notes: ["Cinnamon Sugar", "Cherry Cobbler", "Chocolate"],
+    brewMethod: "V60 Pour-Over",
+    ratio: "1:16",
+    temp: "90°C",
+    grindSize: "Medium",
+    bloomTime: "2 min",
+    pours: "1-2",
+    agitation: "Low",
+  },
+]
 
 type MixedPopoverProps = {
   label: string
@@ -168,7 +188,55 @@ export function CoffeeSection() {
       {/* Main content grid */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Left side - Coffee card */}
-        <div className="bg-card border border-border rounded-xl p-6 md:p-8">
+        <div className="bg-card border border-border rounded-xl p-6 md:p-8 relative">
+          {/* History button */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button 
+                className="absolute top-4 right-4 p-2 hover:bg-muted rounded-md transition-colors group"
+                aria-label="View coffee history"
+              >
+                <History className="w-4 h-4 text-muted-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80" align="end">
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-foreground">Coffee History</p>
+                <div className="space-y-2">
+                  {coffeeHistory.map((coffee) => (
+                    <Link
+                      key={coffee.name}
+                      href={coffee.url}
+                      target="_blank"
+                      className="block p-3 rounded-md bg-muted/50 hover:bg-muted transition-colors group"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 truncate">
+                            {coffee.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {coffee.roaster}
+                          </p>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {coffee.notes.slice(0, 2).map((note) => (
+                              <span
+                                key={note}
+                                className="px-2 py-0.5 text-xs font-mono bg-amber-500/10 text-amber-700 dark:text-amber-300 rounded"
+                              >
+                                {note}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
           <div className="grid md:grid-cols-2 gap-6 md:gap-8">
             {/* Left column - Coffee details */}
             <div className="space-y-6">
